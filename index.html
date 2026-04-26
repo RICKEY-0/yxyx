@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医学影像知识数据库</title>
+    <style>
+        :root {
+            --bg: #f4f6f9;
+            --surface: #ffffff;
+            --surface-hover: #f9fafc;
+            --border: #e3e6ef;
+            --border-light: #eff1f6;
+            --text: #1c2433;
+            --text-secondary: #5a6476;
+            --text-tertiary: #8b919e;
+            --accent: #1a73e8;
+            --accent-light: #e8f0fe;
+            --accent-hover: #1666c5;
+            --accent-soft: #f0f5ff;
+            --chip-bg: #eef1f9;
+            --chip-hover: #e0e4f0;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.08);
+            --radius-sm: 6px;
+            --radius: 10px;
+            --radius-lg: 14px;
+            --radius-xl: 18px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', 'Monaco', monospace;
+            --gradient-subtle: linear-gradient(135deg, #f6f8fd 0%, #f0f4fa 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, 'SF Pro Display', 'SF Pro Text', 'PingFang SC', 'Noto Sans SC', 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            letter-spacing: -0.01em;
+            line-height: 1.4;
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 28px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.88);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            box-shadow: var(--shadow-sm);
+        }
+        .header-logo {
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: #1c3a5c;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+        }
+        .header-logo .icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, #1a73e8 0%, #4a90e2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 8px rgba(26,115,232,0.25);
+        }
+        .search-wrapper {
+            flex: 1;
+            min-width: 260px;
+            max-width: 520px;
+            position: relative;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px 16px 10px 42px;
+            border: 1.5px solid var(--border);
+            border-radius: 24px;
+            font-size: 0.93rem;
+            background: var(--surface);
+            color: var(--text);
+            outline: none;
+            transition: all var(--transition);
+            font-family: inherit;
+            letter-spacing: -0.01em;
+            box-shadow: var(--shadow-sm);
+        }
+        .search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.08);
+            background: #ffffff;
+        }
+        .search-input::placeholder {
+            color: var(--text-tertiary);
+        }
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-tertiary);
+            pointer-events: none;
+            font-size: 0.9rem;
+        }
+        .search-shortcut {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            background: var(--chip-bg);
+            padding: 3px 8px;
+            border-radius: 5px;
+            pointer-events: none;
+            font-family: var(--font-mono);
+            letter-spacing: 0;
+        }
+        .btn-back {
+            padding: 8px 18px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: var(--surface);
+            cursor: pointer;
+            font-size: 0.88rem;
+            color: var(--text);
+            transition: all var(--transition);
+            white-space: nowrap;
+            font-family: inherit;
+            letter-spacing: -0.01em;
+            font-weight: 500;
+        }
+        .btn-back:hover {
+            background: var(--accent-soft);
+            border-color: #c0c9e0;
+            color: var(--accent);
+        }
+        .btn-back.hidden {
+            display: none;
+        }
+
+        /* ========== BREADCRUMB ========== */
+        .breadcrumb {
+            padding: 10px 28px 0;
+            font-size: 0.84rem;
+            color: var(--text-tertiary);
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .breadcrumb span {
+            cursor: pointer;
+            transition: color var(--transition);
+        }
+        .breadcrumb span:hover {
+            color: var(--accent);
+        }
+        .breadcrumb .sep {
+            cursor: default;
+            color: #c5cad5;
+        }
+        .breadcrumb .sep:hover {
+            color: #c5cad5;
+        }
+        .breadcrumb .current {
+            color: var(--text);
+            font-weight: 550;
+            cursor: default;
+        }
+        .breadcrumb .current:hover {
+            color: var(--text);
+        }
+
+        /* ========== MAIN LAYOUT ========== */
+        .main-container {
+            display: flex;
+            padding: 16px 28px 28px;
+            gap: 18px;
+            min-height: calc(100vh - 140px);
+        }
+
+        /* ========== SIDEBAR ========== */
+        .sidebar {
+            width: 250px;
+            flex-shrink: 0;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            padding: 10px 8px;
+            overflow-y: auto;
+            max-height: calc(100vh - 170px);
+            position: sticky;
+            top: 98px;
+            box-shadow: var(--shadow-sm);
+            background: #fff;
+        }
+        .sidebar-title {
+            font-size: 0.73rem;
+            font-weight: 650;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 10px 14px 6px;
+            user-select: none;
+        }
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 14px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all var(--transition);
+            font-size: 0.89rem;
+            font-weight: 470;
+            color: var(--text);
+            user-select: none;
+            margin: 1px 0;
+            position: relative;
+        }
+        .sidebar-item:hover {
+            background: var(--accent-soft);
+            color: #1a3a5c;
+        }
+        .sidebar-item.active {
+            background: var(--accent-light);
+            color: #0d47a1;
+            font-weight: 560;
+            box-shadow: inset 3px 0 0 var(--accent);
+        }
+        .sidebar-item .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #cbd0dd;
+            flex-shrink: 0;
+            transition: all var(--transition);
+        }
+        .sidebar-item.active .dot {
+            background: var(--accent);
+            box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.12);
+        }
+        .sidebar-count {
+            font-size: 0.68rem;
+            color: var(--text-tertiary);
+            margin-left: auto;
+            background: #eef1f9;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+        .sidebar-item.active .sidebar-count {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* ========== CONTENT ========== */
+        .content-area {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* ========== CARDS GRID ========== */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+            gap: 11px;
+        }
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            border-color: #ccd4e5;
+            background: #fafbfe;
+        }
+        .card:active {
+            transform: scale(0.97);
+            transition: 0.1s;
+        }
+        .card.selected {
+            border-color: var(--accent);
+            background: var(--accent-light);
+            box-shadow: 0 0 0 3px rgba(26,115,232,0.07);
+        }
+        .card .card-icon {
+            font-size: 1.7rem;
+            margin-bottom: 4px;
+        }
+        .card .card-label {
+            font-weight: 550;
+            font-size: 0.9rem;
+            color: #1c2a3e;
+            line-height: 1.3;
+        }
+        .card .card-hint {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            margin-top: 4px;
+        }
+        .card.na {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+            background: #f8f9fd;
+            border-color: #eef1f9;
+        }
+        .card.na .card-label {
+            color: #a9aebb;
+        }
+
+        /* ========== RESULT PANEL ========== */
+        .result-panel {
+            background: var(--surface);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 22px 26px;
+            box-shadow: var(--shadow-md);
+            animation: fadeIn 0.25s ease;
+            line-height: 1.65;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-panel .result-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #eef1f6;
+            padding-bottom: 14px;
+        }
+        .result-panel .result-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.76rem;
+            font-weight: 550;
+            letter-spacing: 0.02em;
+        }
+        .badge-location {
+            background: #e8f0fe;
+            color: #1557b0;
+        }
+        .badge-method {
+            background: #f0f2f8;
+            color: #3f4756;
+        }
+        .result-panel .result-title {
+            font-size: 1.2rem;
+            font-weight: 650;
+            color: #0f1e33;
+            margin-left: 4px;
+        }
+        .result-content {
+            font-size: 0.92rem;
+            color: #2d3545;
+            white-space: pre-wrap;
+            word-break: break-word;
+            background: #fafbfd;
+            border-radius: var(--radius-sm);
+            padding: 18px 20px;
+            border: 1px solid #eef1f8;
+            max-height: 60vh;
+            overflow-y: auto;
+            line-height: 1.7;
+        }
+        .result-content strong {
+            color: #0e2b4f;
+        }
+        .result-content .highlight-term {
+            background: #fff7db;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-weight: 500;
+            color: #5a3e0a;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--text-tertiary);
+        }
+        .empty-state .big-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+            opacity: 0.7;
+        }
+        .empty-state p {
+            font-size: 0.92rem;
+            margin: 4px 0;
+        }
+
+        /* ========== TOAST ========== */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2532;
+            color: #fff;
+            padding: 10px 22px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+        }
+        .toast.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* ========== SCROLLBAR ========== */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cdd3e0; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #aeb6c9; }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+                padding: 10px 14px 20px;
+            }
+            .sidebar {
+                width: 100%;
+                max-height: none;
+                position: static;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px;
+                padding: 8px;
+                border-radius: var(--radius);
+            }
+            .sidebar-title { width: 100%; padding: 6px 10px 2px; }
+            .sidebar-item {
+                font-size: 0.78rem;
+                padding: 6px 10px;
+                border-radius: 16px;
+                background: #eef1f9;
+                margin: 1px;
+            }
+            .sidebar-item.active { background: var(--accent-light); }
+            .sidebar-count { display: none; }
+            .sidebar-item .dot { display: none; }
+            .cards-grid { grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); gap: 8px; }
+            .card { padding: 12px 14px; }
+            .card .card-label { font-size: 0.8rem; }
+            .header { padding: 12px 14px; gap: 10px; }
+            .breadcrumb { padding: 8px 14px 0; font-size: 0.78rem; }
+            .result-panel { padding: 16px 18px; }
+            .result-content { padding: 14px; font-size: 0.85rem; max-height: 45vh; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-logo">
+            <div class="icon">🩻</div>
+            <span>医学影像知识数据库</span>
+        </div>
+        <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="globalSearch" placeholder="搜索部位或检查方法，如：脑 MRI、垂体 增强CT…" autocomplete="off">
+            <span class="search-shortcut">⌘K</span>
+        </div>
+        <button class="btn-back hidden" id="btnBack" title="返回首页">← 首页</button>
+    </div>
+
+    <!-- BREADCRUMB -->
+    <div class="breadcrumb" id="breadcrumb"><span data-nav="home">首页</span></div>
+
+    <!-- MAIN -->
+    <div class="main-container">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-title">身体部位</div>
+            <div id="sidebarList"></div>
+        </div>
+        <div class="content-area" id="contentArea"></div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        (function() {
+            // ==================== 通用检查注意事项 （用于所有部位） ====================
+            const universalNote = `📋 通用检查注意事项：
+
+DR（数字化X线摄影）：
+注意事项：去除检查部位的金属物品，如首饰、纽扣等。孕妇需告知医生，必要时采取防护措施。检查时保持静止，避免图像模糊。
+禁忌症：孕妇（尤其是早孕期）尽量避免，除非必要。对X线高度敏感的患者需谨慎。
+
+CT（计算机断层扫描）：
+注意事项：去除检查部位的金属物品。检查时保持静止，必要时屏气。腹部CT需空腹，盆腔CT可能需要憋尿。
+禁忌症：孕妇尽量避免，除非必要。
+
+增强CT：
+注意事项：检查前4-6小时禁食。告知医生过敏史（尤其是碘过敏）和肾功能情况。检查后多喝水，促进造影剂排出。
+禁忌症：对碘造影剂过敏者、严重肾功能不全者、甲亢未控制者。
+
+MRI（磁共振成像）：
+注意事项：去除所有金属物品，包括首饰、眼镜等。检查时保持静止，避免图像模糊。告知医生体内是否有金属植入物（如心脏起搏器、支架等）。
+禁忌症：体内有金属植入物、幽闭恐惧症患者可能无法耐受、早期妊娠（除非必要）。
+
+增强MRI：
+注意事项：检查前4-6小时禁食。告知医生过敏史（尤其是钆造影剂过敏）和肾功能情况。检查后多喝水，促进造影剂排出。
+禁忌症：对钆造影剂过敏者、严重肾功能不全者（可能引发肾源性系统性纤维化）、体内有金属植入物。
+
+彩超（彩色多普勒超声）：
+注意事项：通常无特殊准备，腹部彩超需空腹，盆腔彩超需憋尿。穿着宽松衣物。
+禁忌症：无绝对禁忌症。
+
+PET-CT：
+注意事项：检查前需禁食4-6小时，控制血糖水平，告知医生怀孕或哺乳情况。检查后多喝水促进排泄。
+禁忌症：孕妇、哺乳期妇女一般避免检查。`;
+
+            // 血管专用注意事项
+            const vascularNote = `📋 血管检查注意事项：
+
+CTA（CT血管成像）：
+注意事项：同增强CT，检查前禁食4-6小时，告知过敏史及肾功能，去除金属物品。检查后多喝水。
+禁忌症：碘过敏、严重肾功能不全、甲亢未控制。
+
+MRA（磁共振血管成像）：
+注意事项：同MRI，去除所有金属物品，告知体内植入物。增强MRA需使用钆对比剂，注意事项同增强MRI。
+禁忌症：金属植入物、幽闭恐惧症、严重肾功能不全（增强MRA）。
+
+DSA（数字减影血管造影）：
+注意事项：有创检查，需住院进行。术前禁食，告知过敏史、肾功能及凝血功能。术后穿刺部位加压包扎，观察出血。
+禁忌症：碘过敏、严重凝血功能障碍、严重肾功能不全。
+
+彩超（血管超声）：
+注意事项：通常无特殊准备，穿着宽松衣物。
+禁忌症：无绝对禁忌症。`;
+
+            // ==================== 数据库 ====================
+            const db = {};
+
+            // ---------- 垂体 ----------
+            db['垂体'] = {
+                methods: {
+                    'DR': '优点：\n1.价格低廉，操作简便。\n2.可显示蝶鞍形态、大小及骨质改变。\n缺点：\n1.分辨率低，无法清晰显示垂体及周围软组织。\n2.对微小病变检出率低。\n正常生理影像学表现：\n蝶鞍形态正常，骨质结构完整，无扩大或破坏。\n病理影像学表现：\n垂体腺瘤：蝶鞍扩大，鞍底变薄、下陷，鞍背倾斜。\n颅咽管瘤：蝶鞍扩大，鞍内或鞍上可见钙化。\nRathke囊肿：蝶鞍正常或轻度扩大。',
+                    'CT': '优点：\n分辨率高于X线，可显示垂体形态、密度及周围结构，可进行三维重建。\n缺点：\n1.存在辐射。\n2.对软组织分辨率仍有限，难以区分垂体微腺瘤与正常垂体组织。\n正常生理影像学表现：垂体形态、大小正常，密度均匀，鞍底平坦。\n病理影像学表现：垂体腺瘤：垂体增大，密度均匀或不均匀。颅咽管瘤：鞍区囊实性肿块，囊壁可见钙化。Rathke囊肿：鞍内低密度囊性病变。',
+                    '增强CT': '优点：\n可提高病变检出率，尤其是富血供病变，有助于判断病变性质及范围。\n缺点：\n需注射对比剂，存在过敏风险，辐射剂量高于平扫CT。\n正常生理影像学表现：垂体均匀强化，强化程度与脑实质相似。\n病理影像学表现：垂体腺瘤：肿瘤呈不同程度强化。颅咽管瘤：囊壁及实性部分强化。Rathke囊肿：囊壁无强化或轻度强化。',
+                    'MRI': '优点：\n1.软组织分辨率高，可清晰显示垂体及周围结构。\n2.无辐射。\n3.多序列、多方位成像。\n缺点：\n1.价格相对昂贵。\n2.检查时间较长。\n3.对钙化显示不如CT。\n4.禁忌症（金属植入物、幽闭恐惧症）。\n正常生理影像学表现：T1WI垂体呈等信号，垂体后叶可见高信号亮点。T2WI垂体呈等信号或稍高信号。\n病理影像学表现：垂体腺瘤T1WI等或低信号，T2WI等或高信号。颅咽管瘤T1WI囊性低信号，T2WI高信号。Rathke囊肿信号取决于囊液成分。',
+                    '增强MRI': '优点：\n1.可进一步提高病变检出率，尤其是微小病变。\n2.有助于判断病变性质及范围。\n缺点：\n1.需注射对比剂，存在过敏风险。\n2.价格高。\n正常生理影像学表现：垂体均匀强化。\n病理影像学表现：垂体腺瘤肿瘤强化程度低于正常垂体组织。颅咽管瘤囊壁及实性部分强化。Rathke囊肿囊壁无强化或轻度强化。',
+                    '彩超': '/'
+                },
+                note: universalNote
+            };
+
+            // ---------- 脑 ----------
+            db['脑'] = {
+                methods: {
+                    'DR': '优点：快速价格低，可显示颅骨骨折、钙化或骨质破坏。缺点：软组织分辨率极低，无法显示脑实质病变。正常表现：颅骨结构完整，无骨折或异常钙化。',
+                    'CT': '优点：快速适合急诊，显示脑出血、钙化、颅骨骨折。缺点：辐射剂量较高，软组织对比度低于MRI。正常表现：脑灰白质分界清晰，脑室大小正常。病理表现：脑梗死急性期可能阴性，脑出血急性期高密度血肿，脑肿瘤等/低/高密度占位，脑积水脑室扩张。',
+                    '增强CT': '优点：提高肿瘤、感染或血管病变检出率，评估血脑屏障破坏。缺点：需注射碘对比剂，辐射剂量增加。正常表现：脑实质无异常强化。病理表现：动脉瘤/血管畸形血管异常扩张。',
+                    'MRI': '优点：无辐射，高软组织分辨率，多序列成像。缺点：检查时间长，费用高，对钙化显示差，禁忌症。正常表现：T1WI灰质低信号白质稍高信号，T2WI灰质高信号白质稍低信号，FLAIR灰白质分界清晰，DWI无弥散受限。病理表现：脑梗死DWI高信号，脑出血信号随时期变化，脑肿瘤T1WI低信号T2WI高信号，脑炎/脓肿环形强化，多发性硬化脑室周围白质高信号。',
+                    '增强MRI': '优点：提高肿瘤、炎症、脱髓鞘病变检出率。缺点：需注射钆对比剂。正常表现：脑实质无异常强化。病理表现：脑梗死亚急性期脑回样强化，动脉瘤/血管畸形异常强化。',
+                    '彩超': '优点：无辐射，实时观察血流，适用于婴儿囟门未闭。缺点：成人颅骨遮挡分辨率低。正常表现：婴儿脑室大小正常，回声均匀。病理表现：脑积水侧脑室宽度＞10mm。'
+                },
+                note: universalNote
+            };
+
+            // ---------- 四肢 ----------
+            db['四肢'] = {
+                methods: {
+                    'DR': '优点：快速价格低，显示骨质结构。缺点：软组织分辨率低。正常表现：骨质结构完整，关节间隙均匀。病理表现：骨折骨质连续性中断，关节积液关节间隙增宽，感染骨质破坏或软组织肿胀。',
+                    'CT': '优点：高分辨率显示骨质细节，三维重建。缺点：辐射剂量较高。正常表现：骨质结构清晰，关节面光滑。病理表现：骨折、骨肿瘤骨质破坏或增生，感染骨质破坏软组织密度增高。',
+                    '增强CT': '优点：提高肿瘤、感染或血管病变检出率。缺点：需注射碘对比剂，辐射剂量增加。正常表现：软组织无异常强化。病理表现：血管病变血管异常扩张或狭窄。',
+                    'MRI': '优点：无辐射，高软组织分辨率。缺点：检查时间长，费用高，对钙化显示差，禁忌症。正常表现：T1WI骨髓水肿T2WI高信号，T2WI软骨中等信号韧带低信号。病理表现：骨折骨髓水肿，肌腱炎/撕裂肌腱增厚或连续性中断，韧带损伤，关节积液，骨肿瘤T1WI低信号T2WI高信号，神经卡压神经增粗T2WI高信号。',
+                    '增强MRI': '优点：提高肿瘤、炎症、滑膜炎检出率。缺点：需注射钆对比剂。正常表现：软组织无异常强化，滑膜轻微强化。病理表现：血管病变异常扩张或狭窄。',
+                    '彩超': '优点：无辐射，实时动态观察软组织。缺点：对骨质显示差，依赖操作者经验。正常表现：肌腱韧带纤维状高回声。病理表现：韧带损伤，关节积液无回声，神经卡压神经增粗回声减低，滑膜炎滑膜增厚血流增加。'
+                },
+                note: universalNote
+            };
+
+            // ---------- 胸部 ----------
+            db['胸部'] = {
+                methods: {
+                    'DR': '优点：成像速度快，射线剂量较少，操作简便。缺点：观察肺泡病变不如CR，平面拍摄部分部位显示不清。正常表现：胸廓对称，肺野透亮度正常，肺门结构清晰，纵隔无偏移，横膈光滑，双肋膈角锐利。',
+                    'CT': '优点：高分辨率，多平面重建，快速扫描。缺点：费用较高，造影剂有风险，伪影干扰。正常表现：主动脉肺动脉清晰，淋巴结未见增大。病理表现：肺炎实变影，肺结核斑片状结节状空洞影，肺癌肺门肿块或孤立结节，肺栓塞充盈缺损，COPD肺气肿表现，间质纤维化网状影，胸腔积液，气胸等。',
+                    '增强CT': '优点：高分辨率成像，血管成像清楚，可引导介入。缺点：辐射暴露，造影剂风险，成本较高。正常表现：胸廓对称，肺纹理清晰，无异常密度影，纵隔不增宽。',
+                    'MRI': '/',
+                    '增强MRI': '/',
+                    '彩超': '优点：方便快捷无伤害，可结合血流分析。缺点：对无肿块型病灶难分辨，微小钙化不敏感。正常表现：双侧乳腺层次结构清晰，回声均匀。（注：此处原表为乳腺，胸部彩超通常不适用）'
+                },
+                note: universalNote
+            };
+
+            // ---------- 乳腺 ----------
+            db['乳腺'] = {
+                methods: {
+                    'DR': '（钼靶）优点：高分辨率图像，辐射剂量低，存储方便。缺点：对致密乳腺组织敏感度有限。正常表现：乳腺由15-20个乳腺叶组成。病理表现：结节/肿块良性边缘光滑，恶性分叶状或毛刺状。钙化良性粗大散在，恶性细小簇状、线样分支。不对称结构影提示浸润性癌或瘢痕。',
+                    'CT': '——',
+                    '增强CT': '——',
+                    'MRI': '优点：无辐射，三维重建，病变检出率高于钼靶和超声。缺点：特异性较低，需注射对比剂。正常表现：腺体组织T1中等信号T2稍高信号，脂肪T1、T2高信号。病理表现：囊肿T2高信号无强化，纤维腺瘤均匀强化，乳腺癌明显强化。',
+                    '增强MRI': '优点：高组织分辨率，无辐射，增强提高准确率。缺点：费用高，体内金属禁忌。正常表现：腺体轻度均匀强化，脂肪无强化。病理表现：囊肿无强化，纤维腺瘤均匀强化，乳腺癌快进快出型强化。',
+                    '彩超': '优点：方便快捷无伤害，实时成像。缺点：微小病灶敏感性差，受操作者经验影响。正常表现：分层分布，皮肤、皮下脂肪、腺体等。病理表现：良性结节椭圆形边缘光滑，恶性形态不规则边缘毛刺后方回声衰减。'
+                },
+                note: universalNote
+            };
+
+            // ---------- 上腹部 ----------
+            db['上腹部'] = {
+                methods: {
+                    'DR': '优点：方便快捷，成像快速。缺点：软组织分辨率有限。正常表现：膈肌圆顶状，肝脏密度均匀，脾脏长圆形，胃内气体。病理表现：肠梗阻阶梯状液气平面，肠穿孔膈下游离气体，异物高密度影。',
+                    'CT': '优点：高分辨率，成像快速。缺点：软组织分辨率有限。正常表现：肝脏轮廓光滑密度均匀，胆囊壁薄，胰腺形态规则，脾脏弯月形。病理表现：肠梗阻肠管扩张积液移行带，肠穿孔腹腔游离气体，异物清晰显示。',
+                    '增强CT': '优点：提高诊断准确性，检查速度快。缺点：造影剂过敏风险，肾损害风险。正常表现：肝脏均匀强化，胆囊大小正常，胰腺均匀强化。异常表现：肝癌快进快出，肝血管瘤周边结节状强化，胰腺癌不均匀强化，肾癌明显强化。',
+                    'MRI': '优点：多序列成像，组织分辨率高。缺点：检查时间长，禁忌症。正常表现：肝脏T1中等信号T2低信号，胆囊T2高信号，胰腺T1高信号T2中等信号，脾脏T1中低信号。病理表现：肠梗阻肠管扩张T2高信号，肠穿孔游离气体极低信号，异物金属禁忌。',
+                    '增强MRI': '/',
+                    '彩超': '优点：方便快捷，价格相对低。缺点：受气体和肥胖影响。正常表现：肝脏回声均匀，胆囊壁光滑，胰腺条索状，脾脏回声均匀，肾脏皮髓质清晰。病理表现：肠梗阻肠管扩张，肠穿孔游离气体强回声，异物强回声伴声影。'
+                },
+                note: universalNote
+            };
+
+            // ---------- 下腹部 ----------
+            db['下腹部'] = {
+                methods: {
+                    'DR': '优点：灵敏度高，价格低廉。缺点：影像重叠，分辨率有限。正常表现：观察骨盆、腰椎，肠道气体液体分布，脏器轮廓。病理表现：肠梗阻液气平面，肠穿孔膈下游离气体，异物高密度影。',
+                    'CT': '优点：高分辨率，三维重建。缺点：费用昂贵，伪影干扰。正常表现：肠道壁厚<5mm，肾脏轮廓清晰，膀胱囊状壁薄。病理表现：肠梗阻肠管扩张积液，肠穿孔游离气体，异物位置清晰。',
+                    '增强CT': '优点：灵敏度高，诊断准确。缺点：不适感和潜在并发症。正常表现：肠壁轻度强化，实质器官均匀强化。病理表现：肠道炎症肠壁增厚异常强化，肿瘤肿块明显强化，肝癌快进快出，胰腺癌不均匀强化，肾癌明显强化，动脉瘤局部扩张。',
+                    'MRI': '优点：定量分析，为手术提供指导。缺点：费用高，检查时间长，禁忌症。正常表现：子宫T1低信号T2分层，卵巢T1低信号T2卵泡高信号，阴道T2低信号，膀胱T2高信号。病理表现：肠梗阻肠管扩张T2高信号，肠穿孔游离气体，异物金属禁忌。',
+                    '增强MRI': '优点：无辐射，定量分析。缺点：费用高，时间长。正常表现：肠壁中等信号，膀胱低信号，血管流空低信号。病理表现：炎症高信号，肿瘤不均匀强化，囊肿无强化，脓肿壁环状强化。',
+                    '彩超': '优点：无辐射，实时成像，成本低。缺点：分辨率有限，气体干扰。正常表现：膀胱壁光滑高回声，前列腺中等回声，子宫三层结构，卵巢弱回声。病理表现：肠梗阻肠管扩张，肠穿孔游离气体，异物强回声伴声影，泌尿生殖系统结石、肿瘤、囊肿等。'
+                },
+                note: universalNote
+            };
+
+            // ---------- 盆腔（女） ----------
+            db['盆腔（女）'] = {
+                methods: {
+                    'DR': '优点：快速成像，成本低。缺点：气体干扰，软组织显示有限。正常表现：骨盆骨骼对称，关节间隙正常。病理表现：骨折、钙化灶、异物、直肠癌肠腔狭窄。子宫输卵管造影可评估不孕症、输卵管阻塞。',
+                    'CT': '优点：详细解剖结构，检查时间短。缺点：软组织分辨率较低。正常表现：子宫体均匀软组织密度，宫颈圆形软组织影，卵巢卵圆形，膀胱液性密度。病理表现：直肠癌肠壁不规则增厚或肿块，增强后不均匀强化。',
+                    '增强CT': '优点：高分辨率，三维重建。缺点：费用高，伪影干扰。正常表现：子宫肌层明显强化，卵巢轻度强化。病理表现：子宫肌瘤低密度肿块，子宫内膜癌内膜增厚，卵巢囊肿低密度囊性病变，卵巢癌囊实性肿块，直肠癌动脉期明显强化。',
+                    'MRI': '优点：软组织分辨率极高，无辐射。缺点：时间长，费用高，禁忌症。正常表现：子宫肌层T1中等偏低T2等信号，内膜T2高信号，宫颈多层结构，卵巢T1低信号T2卵泡高信号。病理表现：直肠癌T2中高信号，DWI弥散受限高信号，ADC值降低。',
+                    '增强MRI': '优点：精准评估分期，无辐射。缺点：时间长，费用高。正常表现：子宫肌层明显强化，内膜轻中度强化，卵巢轻度强化。病理表现：直肠癌T1期局限于黏膜，T3期侵犯肌层外脂肪，T4期侵犯邻近器官。',
+                    '彩超': '优点：无辐射，实时成像，成本低。缺点：分辨率有限，气体干扰。正常表现：子宫倒置梨形，肌层回声均匀，卵巢大小正常。病理表现：子宫肌瘤、腺肌症、子宫内膜息肉、卵巢囊肿、输卵管积水、直肠癌低回声肿块。'
+                },
+                note: universalNote
+            };
+
+            // ---------- 盆腔（男） ----------
+            db['盆腔（男）'] = {
+                methods: {
+                    'DR': '优点：辐射小，操作简单，费用低。缺点：软组织分辨率低。正常表现：骨骼轮廓清晰，盆腔脏器模糊。病理表现：直肠癌肠腔狭窄或梗阻，可能伴膈下游离气体。',
+                    'CT': '优点：高密度分辨率，清晰显示前列腺膀胱。缺点：辐射较大，费用较高。正常表现：精囊对称卵圆形，淋巴结短径<10mm。病理表现：直肠癌肠壁不规则增厚或肿块，前列腺癌不对称增大密度不均。',
+                    '增强CT': '优点：提高血管和病变显示，肿瘤分期更有效。缺点：过敏风险和肾毒性。正常表现同CT。病理表现：直肠癌动脉期明显强化，前列腺癌不均匀强化。',
+                    'MRI': '优点：无辐射，软组织分辨率极高。缺点：时间长，费用高，金属植入物禁忌。正常表现：周围带低信号结节。病理表现：直肠癌T2中高信号，DWI高信号ADC值降低；前列腺癌T2外周带低信号结节，DWI高信号ADC降低。',
+                    '增强MRI': '优点：提高前列腺癌鉴别，精准评估直肠癌分期。缺点：需注射钆对比剂，费用高。正常表现：前列腺外周带均匀轻度强化，直肠黏膜层明显强化。',
+                    '彩超': '优点：无辐射，实时引导穿刺活检。缺点：受肠气干扰，深部结构显示差。正常表现：前列腺均匀中等回声，包膜完整。病理表现：直肠癌经直肠超声见低回声肿块，前列腺癌外周带低回声结节血流丰富。'
+                },
+                note: universalNote
+            };
+
+            // ---------- 颈椎 ----------
+            db['颈椎'] = {
+                methods: {
+                    'DR': '优点：操作快捷成本低，适合初步筛查骨质结构及生理曲度。缺点：软组织分辨率差，无法显示椎间盘脊髓。正常表现：颈椎生理性前凸，椎体轮廓清晰，椎间隙均匀。病理表现：颈椎退行性变椎间隙变窄、骨质增生、项韧带钙化。',
+                    'CT': '优点：三维断层成像清晰显示骨性结构，增强CT可评估血管病变。缺点：辐射剂量较高，软组织分辨率有限。正常表现：椎体骨皮质连续，椎间盘均匀软组织密度。病理表现：椎体后缘骨赘、小关节增生、椎管狭窄，椎间盘突出硬膜囊受压。',
+                    '增强CT': '/',
+                    'MRI': '优点：无辐射，高软组织分辨率，多序列成像。缺点：检查时间长，费用高，禁忌症。正常表现：椎间盘T2WI高信号，脊髓无受压。病理表现：椎间盘T2低信号脱水，硬膜囊受压，脊髓变性T2高信号，髓内病变星形细胞瘤、室管膜瘤、脊髓炎等，髓外硬膜下神经鞘瘤、脊膜瘤，硬膜外淋巴瘤、转移瘤、脓肿、血肿。椎旁肿块神经源性肿瘤等。椎体肿块骨巨细胞瘤等。',
+                    '增强MRI': '/',
+                    '彩超': '/',
+                    'PET-CT': '优点：结合代谢与解剖信息，适用于全身评估肿瘤转移或炎症。缺点：辐射剂量大，价格昂贵，对小病灶敏感度低。'
+                },
+                note: universalNote
+            };
+
+            // ---------- 胸椎 ----------
+            db['胸椎'] = {
+                methods: {
+                    'DR': '优点：快速经济，初步评估骨质结构及生理曲度。缺点：软组织分辨率差。正常表现：胸椎生理性后凸，椎体轮廓清晰，椎间隙均匀。病理表现：胸椎退行性变椎间隙变窄、骨质增生。',
+                    'CT': '优点：三维断层成像清晰显示骨性细节，增强CT评估肿瘤血供。缺点：辐射剂量较高。正常表现：椎体骨皮质连续，椎间盘均匀软组织密度。病理表现：胸椎骨折压缩性骨折楔形变、爆裂性骨折，胸椎肿瘤溶骨性或成骨性破坏。',
+                    '增强CT': '/',
+                    'MRI': '优点：无辐射，高软组织分辨率。缺点：时间长，禁忌症。正常表现：椎体T1中等信号T2稍高信号，椎间盘T2中央高信号，脊髓无受压。病理表现：椎间盘T2低信号脱水，硬膜囊受压，髓内病变、髓外硬膜下病变、硬膜外病变，椎旁肿块，椎体肿块。',
+                    '增强MRI': '/',
+                    '彩超': '/',
+                    'PET-CT': '优点：全身评估转移瘤、炎症或隐匿性肿瘤。缺点：辐射剂量大，价格昂贵，对微小病灶敏感度低。'
+                },
+                note: universalNote
+            };
+
+            // ---------- 腰椎 ----------
+            db['腰椎'] = {
+                methods: {
+                    'DR': '优点：操作快捷成本低，评估骨质结构及稳定性。缺点：软组织分辨率差。正常表现：腰椎生理性前凸，椎体轮廓清晰，椎间隙均匀。病理表现：椎间隙变窄、骨质增生、椎管狭窄。',
+                    'CT': '优点：三维断层清晰显示骨性细节。缺点：辐射剂量较高，软组织分辨率有限。正常表现：椎体骨皮质连续，椎管无狭窄。病理表现：腰椎间盘突出硬膜囊受压，腰椎骨折压缩性骨折。',
+                    '增强CT': '/',
+                    'MRI': '优点：无辐射，高软组织分辨率。缺点：时间长，费用高，禁忌症。正常表现：椎体T1中等信号T2稍高信号，椎间盘T2中央高信号，脊髓T2脑脊液高信号。病理表现：椎间盘T2低信号脱水，硬膜囊受压，髓内病变、髓外硬膜下病变、硬膜外病变，椎旁肿块，椎体肿块。',
+                    '增强MRI': '/',
+                    '彩超': '/',
+                    'PET-CT': '优点：全身评估肿瘤转移或炎症。缺点：辐射剂量大，价格昂贵，假阳性率高。'
+                },
+                note: universalNote
+            };
+
+            // ---------- 膝关节 ----------
+            db['膝关节'] = {
+                methods: {
+                    'DR': '优点：快速价格低，显示骨质结构。缺点：软组织分辨率低。正常表现：关节间隙均匀，骨质结构完整。病理表现：骨折骨质连续性中断，骨关节炎关节间隙狭窄骨赘形成，关节积液关节间隙增宽。',
+                    'CT': '优点：高分辨率显示骨质细节。缺点：辐射剂量较高。正常表现：骨质结构清晰关节面光滑。病理表现：骨折、骨肿瘤骨质破坏或增生。',
+                    '增强CT': '优点：提高肿瘤、感染检出率。缺点：需注射碘对比剂，辐射增加。',
+                    'MRI': '优点：无辐射，高软组织分辨率，显示软骨、韧带、半月板。缺点：时间长，费用高，禁忌症。正常表现：T1软骨中等信号韧带低信号，T2关节液高信号，PD清晰显示软骨和半月板。病理表现：骨折骨髓水肿，骨关节炎软骨变薄缺损，半月板损伤线状高信号，韧带损伤连续性中断，滑膜炎滑膜增厚，关节积液。',
+                    '增强MRI': '优点：提高肿瘤、炎症检出率。缺点：需注射钆对比剂。正常表现：滑膜轻微强化。',
+                    '彩超': '优点：无辐射，实时动态观察软组织。缺点：对骨质显示差。正常表现：肌腱韧带纤维状高回声。病理表现：韧带损伤、滑膜炎、关节积液、肌腱炎。'
+                },
+                note: universalNote
+            };
+
+            // ---------- 肘关节 ----------
+            db['肘关节'] = {
+                methods: {
+                    'DR': '优点：快速价格低，显示骨质结构。缺点：软组织分辨率低。正常表现：关节间隙均匀，肱桡关节、肱尺关节对位良好。病理表现：骨折骨折线清晰，脱位对位异常，关节积液关节间隙增宽，游离体高密度影。',
+                    'CT': '优点：高分辨率显示骨质细节，三维重建。缺点：辐射剂量较高。正常表现：骨质结构清晰。病理表现：骨折、脱位、骨肿瘤、游离体。',
+                    '增强CT': '优点：提高肿瘤、感染检出率。缺点：需注射碘对比剂。',
+                    'MRI': '优点：无辐射，高软组织分辨率，显示软骨、韧带、肌腱。缺点：时间长，费用高。正常表现：T1软骨中等信号韧带低信号，T2关节液高信号。病理表现：骨折骨髓水肿，肌腱炎/撕裂肌腱增厚或连续性中断，韧带损伤，关节积液，骨肿瘤T1低信号T2高信号，神经卡压神经增粗，游离体T1、T2低信号。',
+                    '增强MRI': '优点：提高肿瘤、炎症检出率。缺点：需注射钆对比剂。',
+                    '彩超': '优点：无辐射，实时动态观察。缺点：对骨质显示差。病理表现：肌腱炎/撕裂、韧带损伤、滑膜炎、关节积液、神经卡压。'
+                },
+                note: universalNote
+            };
+
+            // ---------- 骶髂关节 ----------
+            db['骶髂关节'] = {
+                methods: {
+                    'DR': '优点：成本低，显示骨质变化，辐射量较小。缺点：早期病变敏感性低。解剖学表现：骶髂关节由髂骨耳状面与骶骨耳状面构成，属平面关节。正常表现：正位像每侧骶髂关节呈两条人字形透明线。病理表现：骶髂关节肿瘤、骶髂关节炎、结核性骶髂关节炎、强直性脊柱炎（双侧X线骶髂关节炎≥III级）。',
+                    'CT': '优点：高分辨率骨结构成像，三维CT可清晰显示骨质细节，检查时间短。缺点：辐射剂量较高，软组织分辨率不足。',
+                    '增强CT': '优点：血管与感染评估，提高病变对比度。缺点：辐射与造影剂风险叠加。',
+                    'MRI': '优点：早期炎症检测敏感，对骨髓水肿、滑膜炎高度敏感，是诊断炎性背痛的金标准。无辐射，高软组织分辨率。缺点：成像时间较长，对骨骼和钙化显示不佳，费用较高，金属植入物限制。',
+                    '增强MRI': '优点：可评估炎症活动性，检测骨髓水肿、滑膜增厚，是诊断AS的金标准。无电离辐射。缺点：费用高耗时长，禁忌症限制，骨质细节显示较弱。',
+                    '彩超': '/'
+                },
+                note: universalNote
+            };
+
+            // ---------- 双髋关节 ----------
+            db['双髋关节'] = {
+                methods: {
+                    'DR': '解剖学表现：髋关节由股骨头与髋臼构成，属球窝关节。正常表现：股骨头在髋臼内，髋臼覆盖面积70%-80%，关节间隙约1-2mm。病理表现：髋关节暂时性滑膜炎、一过性骨质疏松、退行性骨关节病（首选X线）、创伤性关节炎。',
+                    'CT': '优点：高分辨率骨骼成像，三维重建，快速成像。缺点：辐射量较高，软组织分辨率有限。病理表现：退行性骨关节病骨质增生、关节间隙狭窄、假囊肿，创伤性关节炎关节积液、游离体。',
+                    '增强CT': '优点：更清晰的血管和组织对比，提高病变检出率。缺点：辐射和造影剂风险。',
+                    'MRI': '优点：无辐射，高软组织分辨率，多序列成像。缺点：成像时间长，对骨骼钙化显示不佳，费用高，金属植入物限制。病理表现：一过性骨质疏松T1低信号T2高信号，退行性骨关节病早期软骨内条状低信号带。',
+                    '增强MRI': '髋关节MRI是评估髋关节疾病的重要方法，对骨质、软骨、盂唇、积液及滑囊、肌肉和肌腱等结构观察优势突出。',
+                    '彩超': '/'
+                },
+                note: universalNote
+            };
+
+            // ---------- 踝关节 ----------
+            db['踝关节'] = {
+                methods: {
+                    'DR': '优点：快速价格低，显示骨质结构。缺点：软组织分辨率低。正常表现：胫距关节、距下关节对位良好，关节间隙约3-4mm。病理表现：踝关节骨折骨折线清晰，脱位距骨移位，骨关节炎关节间隙狭窄骨赘形成。',
+                    'CT': '优点：高密度分辨率，适合关节细微检查。缺点：辐射较大，费用较高。',
+                    '增强CT': '/',
+                    'MRI': '优点：无辐射，高软组织分辨率。缺点：时间长，费用高。病理表现：软骨软化软骨信号层次模糊，骨软骨损伤距骨前外侧后内侧T1低信号STIR高信号，肌腱损伤跟腱增粗肿胀断裂。',
+                    '增强MRI': '/',
+                    '彩超': '/'
+                },
+                note: universalNote
+            };
+
+            // ---------- 腕关节 ----------
+            db['腕关节'] = {
+                methods: {
+                    'DR': '优点：快速价格低，显示骨质结构。缺点：软组织分辨率低。正常表现：腕骨排列整齐，桡腕关节间隙约2-3mm。病理表现：腕骨骨折如舟状骨骨折，腕关节脱位月骨周围脱位，骨关节炎关节间隙狭窄。',
+                    'CT': '优点：高分辨率骨骼成像，快速成像，三维重建。缺点：辐射量较高，软组织分辨率有限。',
+                    '增强CT': '优点：血管与血供评估，提高病变检出率。缺点：辐射与造影剂风险。',
+                    'MRI': '优点：无辐射，高软组织分辨率。缺点：时间长，费用高。病理表现：腕管综合征正中神经增粗肿胀，腕关节不稳舟月韧带撕裂，TFCC撕裂连续性中断T2高信号，舟月骨缺血性坏死T1低信号T2高信号，韧带撕裂。',
+                    '增强MRI': '优点：软组织分辨率卓越，无辐射。缺点：检查时间长，对钙化显示差。',
+                    '彩超': '/'
+                },
+                note: universalNote
+            };
+
+            // ---------- 手 ----------
+            db['手'] = {
+                methods: {
+                    'DR': '优点：操作简便费用低，主要用于骨折和脱臼。缺点：有辐射，分辨率不高。解剖学表现：手分为手掌、手背和手指。正常表现：桡尺骨远端、8块腕骨和5个掌骨近端构成关节无畸形。病理表现：类风湿性关节炎对称性多关节侵蚀，银屑病关节炎远端指间关节侵蚀增生，痛风痛风石侵蚀呈“鼠咬”外观。',
+                    'CT': '优点：高分辨率骨骼成像，三维重建，快速扫描。缺点：辐射量较高，软组织分辨率有限。',
+                    '增强CT': '优点：血管与病变血供评估，提高复杂病变检出率。缺点：辐射与造影剂风险。',
+                    'MRI': '优点：卓越软组织分辨率，无辐射，多模态成像。缺点：检查时间长，对钙化显示差，金属伪影干扰。病理表现：莫顿神经瘤T1等信号T2低信号，腱鞘炎肌腱增厚积液，足底纤维瘤病T1低至中等信号，骨化性肌炎异位骨化，籽骨炎骨髓信号异常。',
+                    '增强MRI': '优点：强化病变对比度，动态评估血流动力学。缺点：造影剂风险，费用高。',
+                    '彩超': '/'
+                },
+                note: universalNote
+            };
+
+            // ---------- 足 ----------
+            db['足'] = {
+                methods: {
+                    'DR': '优点：快速筛查，成本低廉，骨骼显影直观。缺点：二维结构重叠，软组织分辨率差。解剖学表现：足部26块骨包括跟骨、舟骨、骰骨、楔骨、跖骨、趾骨。病理表现：莫顿神经瘤、腱鞘炎、足底纤维瘤病、骨化性肌炎、籽骨炎。',
+                    'CT': '优点：方便快捷，成像快速。缺点：软组织分辨率有限。',
+                    '增强CT': '优点：血管及血供评估，感染与肿瘤鉴别。缺点：双重风险叠加。',
+                    'MRI': '优点：卓越软组织分辨率，无电离辐射，多参数成像。缺点：检查时间长，钙化显示差，禁忌症限制。',
+                    '增强MRI': '优点：病变活动性评估，血管成像。缺点：钆剂风险，费用高。',
+                    '彩超': '/'
+                },
+                note: universalNote
+            };
+
+            // ---------- 鼻窦 ----------
+            db['鼻窦'] = {
+                methods: {
+                    'DR': '——',
+                    'CT': '优点：检查鼻窦疾病优于X线，经济实惠成像快，能很好显示肿瘤部位及骨质破坏。缺点：对侵犯眶内和颅内病灶显示不如MRI。影像表现：鼻窦含气CT低密度，窦壁骨质高密度。',
+                    '增强CT': '优点：补充较早病变的漏诊。检查方法：静注钆对比剂。',
+                    'MRI': '优点：直观清楚展示病变位置、大小、信号强度，无辐射损伤，软组织分辨率高，多平面成像。缺点：禁忌症。影像表现：良性肿瘤信号均匀边界光滑，恶性肿瘤信号不均匀边界不规则，MRI不可分辨囊实性肿瘤。',
+                    '增强MRI': '优点：补充较早病变漏诊。检查方法：GD-DTPA 0.1mL/kg。',
+                    '彩超': '/'
+                },
+                note: universalNote
+            };
+
+            // ---------- 鼻咽 ----------
+            db['鼻咽'] = {
+                methods: {
+                    'DR': '优点：快速价格低，显示鼻咽腔气道及腺样体大小，适合儿童筛查。缺点：软组织分辨率低。正常表现：鼻咽腔气道通畅，腺样体厚度＜12mm（儿童）或＜5mm（成人）。病理表现：腺样体肥大厚度增加。',
+                    'CT': '优点：密度分辨率高，清晰区分软组织差异。影像表现：咽部横断面扫描，鼻咽侧壁咽鼓管开口和咽隐窝。异常表现：良性肿瘤边缘光整，恶性肿瘤以鼻咽癌为主，咽旁脂肪间隙消失。',
+                    '增强CT': '优点：评估骨质破坏、血管侵犯和急诊情况。缺点：需权衡对比剂风险和辐射暴露。',
+                    'MRI': '优点：鉴别鼻咽癌放疗后复发和纤维瘢痕。禁忌症。影像表现：复发T1低信号T2高信号，纤维瘢痕T1、T2均为低信号。',
+                    '增强MRI': '优点：鼻咽癌诊断和分期的金标准，适用于早期病变、神经侵犯和放疗监测。缺点：检查时间较长费用较高。常与CT互补。',
+                    '彩超': '/'
+                },
+                note: universalNote
+            };
+
+            // ---------- 肩关节 ----------
+            db['肩关节'] = {
+                methods: {
+                    'DR': '优点：快速价格低，显示骨质结构。缺点：软组织分辨率低。正常表现：关节间隙均匀，肱骨头与关节盂对位良好。',
+                    'CT': '优点：高分辨率显示骨质细节，三维重建。缺点：辐射剂量较高。',
+                    '增强CT': '/',
+                    'MRI': '优点：无辐射，高软组织分辨率，显示肩袖、盂唇等结构。缺点：检查时间长，费用高。病理表现：肩袖撕裂、盂唇损伤、肱二头肌腱炎等。',
+                    '增强MRI': '/',
+                    '彩超': '优点：无辐射，实时动态观察肩袖肌腱。缺点：依赖操作者经验。'
+                },
+                note: universalNote
+            };
+
+            // ---------- 血管 ----------
+            db['血管'] = {
+                methods: {
+                    'CTA': '（CT血管成像）\n优点：快速分辨率高，显示血管解剖细节，三维重建直观，可作为心脑血管首选筛查。缺点：需注射碘对比剂，辐射剂量较高。正常表现：血管管腔光滑无狭窄扩张，管壁无增厚。病理表现：动脉粥样硬化管壁增厚狭窄斑块形成，动脉瘤局部扩张，主动脉夹层内膜片真假腔，动静脉畸形异常血管团，血栓充盈缺损。',
+                    'MRA': '（磁共振血管成像）\n优点：无辐射，无需对比剂(非增强MRA)或使用钆对比剂，显示血管壁和周围软组织。缺点：检查时间长，对钙化显示差，禁忌症。正常表现：管腔光滑无狭窄扩张，血流信号均匀。病理表现：同CTA。',
+                    'DSA': '（数字减影血管造影）\n优点：金标准分辨率最高，实时动态观察血流，可同时介入治疗。缺点：有创检查需穿刺，辐射剂量高，需碘对比剂。正常表现：血管充盈良好，管腔光滑。病理表现：清晰显示各类血管病变。',
+                    '彩超': '（彩色多普勒超声）\n优点：无创无辐射，实时成像动态观察血流，成本低易重复。缺点：空间分辨率低，对小血管显示不佳，受操作者影响。正常表现：血管壁光滑管腔均匀，血流信号均匀。病理表现：血管狭窄闭塞，血管瘤，动静脉畸形，血栓形成。'
+                },
+                note: vascularNote,
+                isVascular: true
+            };
+
+            // ==================== 所有部位列表（已删除肾上腺、眶部、内听道、颈部） ====================
+            const allLocations = [
+                '垂体', '脑', '四肢', '胸部', '乳腺', '上腹部', '下腹部',
+                '盆腔（女）', '盆腔（男）', '颈椎', '胸椎', '腰椎',
+                '膝关节', '肘关节', '骶髂关节', '双髋关节', '踝关节', '腕关节',
+                '手', '足', '鼻窦', '鼻咽', '肩关节', '血管'
+            ];
+
+            // ==================== 状态管理 ====================
+            let currentLocation = null;
+            let currentMethod = null;
+            let viewMode = 'home';
+
+            // ==================== DOM ====================
+            const sidebarList = document.getElementById('sidebarList');
+            const contentArea = document.getElementById('contentArea');
+            const breadcrumb = document.getElementById('breadcrumb');
+            const btnBack = document.getElementById('btnBack');
+            const globalSearch = document.getElementById('globalSearch');
+            const toast = document.getElementById('toast');
+
+            function showToast(msg) {
+                toast.textContent = msg;
+                toast.classList.add('show');
+                clearTimeout(toast._timeout);
+                toast._timeout = setTimeout(() => toast.classList.remove('show'), 1800);
+            }
+
+            function renderSidebar(activeLocation) {
+                sidebarList.innerHTML = allLocations.map(loc => {
+                    const isActive = loc === activeLocation;
+                    return `
+                    <div class="sidebar-item${isActive ? ' active' : ''}" data-location="${escapeHtml(loc)}">
+                        <span class="dot"></span>
+                        <span>${escapeHtml(loc)}</span>
+                        <span class="sidebar-count">${db[loc].isVascular ? '血管' : Object.keys(db[loc].methods).length}项</span>
+                    </div>`;
+                }).join('');
+                sidebarList.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.addEventListener('click', () => selectLocation(item.dataset.location));
+                });
+            }
+
+            function getLocationIcon(loc) {
+                const icons = {
+                    '脑':'🧠','垂体':'🔬','胸部':'🫁','乳腺':'🎀','上腹部':'🔍','下腹部':'🔍',
+                    '盆腔（女）':'♀️','盆腔（男）':'♂️','颈椎':'🦴','胸椎':'🦴','腰椎':'🦴',
+                    '膝关节':'🦵','肘关节':'💪','骶髂关节':'🦴','双髋关节':'🦴','踝关节':'🦶',
+                    '腕关节':'🤲','手':'✋','足':'🦶','四肢':'💪','鼻窦':'👃','鼻咽':'👃',
+                    '肩关节':'💪','血管':'❤️'
+                };
+                return icons[loc] || '📌';
+            }
+            function getMethodIcon(method) {
+                const icons = {
+                    'DR':'☢️','CT':'🖥️','增强CT':'💉','MRI':'🧲','增强MRI':'💉',
+                    '彩超':'📡','PET-CT':'🔬','CTA':'🫀','MRA':'🧲','DSA':'💉'
+                };
+                return icons[method] || '📋';
+            }
+
+            function renderHome() {
+                viewMode = 'home'; currentLocation = null; currentMethod = null;
+                btnBack.classList.add('hidden'); updateBreadcrumb();
+                contentArea.innerHTML = `
+                <div class="empty-state" style="padding:30px 20px;">
+                    <div class="big-icon">📋</div>
+                    <p style="font-weight:600;font-size:1.05rem;color:#444;">选择身体部位开始检索</p>
+                    <p style="font-size:0.82rem;">从左侧列表点击部位，或使用顶部搜索框快速查找</p>
+                </div>
+                <div class="cards-grid" style="margin-top:6px;">
+                    ${allLocations.map(loc => {
+                        const icon = getLocationIcon(loc);
+                        return `<div class="card" data-location="${escapeHtml(loc)}" title="${escapeHtml(loc)}">
+                            <div class="card-icon">${icon}</div>
+                            <div class="card-label">${escapeHtml(loc)}</div>
+                            <div class="card-hint">${db[loc].isVascular ? '血管专项' : Object.keys(db[loc].methods).length + '种检查'}</div>
+                        </div>`;
+                    }).join('')}
+                </div>`;
+                contentArea.querySelectorAll('.card').forEach(card => {
+                    card.addEventListener('click', () => selectLocation(card.dataset.location));
+                });
+                renderSidebar(null);
+            }
+
+            function renderLocation(location) {
+                viewMode = 'location'; currentLocation = location; currentMethod = null;
+                btnBack.classList.remove('hidden'); updateBreadcrumb();
+                const data = db[location];
+                const methodKeys = Object.keys(data.methods);
+                const noteContent = data.note || '';
+                const methodsHTML = methodKeys.map(key => {
+                    const content = data.methods[key];
+                    const isNA = content === '——' || content === '/' || !content || content.trim() === '';
+                    return `<div class="card${isNA ? ' na' : ''}" data-method="${escapeHtml(key)}" data-location="${escapeHtml(location)}">
+                        <div class="card-icon">${getMethodIcon(key)}</div>
+                        <div class="card-label">${escapeHtml(key)}</div>
+                        <div class="card-hint">${isNA ? '不适用' : '点击查看详情'}</div>
+                    </div>`;
+                }).join('');
+
+                contentArea.innerHTML = `
+                <div style="margin-bottom:4px;">
+                    <span style="font-weight:650;font-size:1.1rem;">${escapeHtml(location)}</span>
+                    <span style="color:var(--text-tertiary);font-size:0.85rem;margin-left:8px;">— 选择检查方法</span>
+                </div>
+                <div class="cards-grid">${methodsHTML}</div>
+                ${noteContent ? `<div class="result-panel" style="margin-top:14px;">
+                    <div class="result-header"><span class="result-badge badge-method">📝 注意事项</span></div>
+                    <div class="result-content" style="max-height:45vh;">${escapeHtml(noteContent)}</div>
+                </div>` : ''}`;
+                contentArea.querySelectorAll('.card:not(.na)').forEach(card => {
+                    card.addEventListener('click', () => renderResult(card.dataset.location, card.dataset.method));
+                });
+                renderSidebar(location);
+            }
+
+            function renderResult(location, method) {
+                viewMode = 'result'; currentLocation = location; currentMethod = method;
+                btnBack.classList.remove('hidden'); updateBreadcrumb();
+                const content = db[location].methods[method] || '暂无数据';
+                contentArea.innerHTML = `
+                <div class="result-panel">
+                    <div class="result-header">
+                        <span class="result-badge badge-location">📍 ${escapeHtml(location)}</span>
+                        <span class="result-badge badge-method">${getMethodIcon(method)} ${escapeHtml(method)}</span>
+                    </div>
+                    <div class="result-content">${formatContent(content)}</div>
+                    <div style="margin-top:15px;display:flex;gap:8px;flex-wrap:wrap;">
+                        <button class="btn-back" onclick="window._selectLocation('${escapeJs(location)}')">← 返回${escapeHtml(location)}</button>
+                        <button class="btn-back" onclick="window._goHome()">🏠 返回首页</button>
+                    </div>
+                </div>`;
+                renderSidebar(location);
+            }
+
+            function formatContent(content) {
+                if (!content || content === '/' || content === '——') return '<em style="color:#999;">暂无相关内容</em>';
+                let html = escapeHtml(content);
+                html = html.replace(/^(优点[：:])/gm, '<strong>$1</strong>');
+                html = html.replace(/^(缺点[：:])/gm, '<strong>$1</strong>');
+                html = html.replace(/^(正常[^：:]*[：:])/gm, '<strong>$1</strong>');
+                html = html.replace(/^(病理[^：:]*[：:])/gm, '<strong>$1</strong>');
+                html = html.replace(/^(解剖[^：:]*[：:])/gm, '<strong>$1</strong>');
+                html = html.replace(/^(生理[^：:]*[：:])/gm, '<strong>$1</strong>');
+                html = html.replace(/^(影像学[^：:]*[：:])/gm, '<strong>$1</strong>');
+                html = html.replace(/^(检查方法[：:])/gm, '<strong>$1</strong>');
+                html = html.replace(/^(禁忌症[：:])/gm, '<strong>$1</strong>');
+                html = html.replace(/^(注意事项[：:])/gm, '<strong>$1</strong>');
+                html = html.replace(/^(异常[^：:]*[：:])/gm, '<strong>$1</strong>');
+                html = html.replace(/^(其他[^：:]*[：:])/gm, '<strong>$1</strong>');
+                html = html.replace(/T1WI/g, '<span class="highlight-term">T1WI</span>');
+                html = html.replace(/T2WI/g, '<span class="highlight-term">T2WI</span>');
+                html = html.replace(/DWI/g, '<span class="highlight-term">DWI</span>');
+                html = html.replace(/FLAIR/g, '<span class="highlight-term">FLAIR</span>');
+                html = html.replace(/PDWI/g, '<span class="highlight-term">PDWI</span>');
+                html = html.replace(/STIR/g, '<span class="highlight-term">STIR</span>');
+                html = html.replace(/ADC/g, '<span class="highlight-term">ADC</span>');
+                return html;
+            }
+
+            function selectLocation(loc) {
+                if (!db[loc]) { showToast('未找到该部位'); return; }
+                renderLocation(loc);
+                window.location.hash = encodeURIComponent(loc);
+            }
+            function updateBreadcrumb() {
+                let html = '<span data-nav="home">首页</span>';
+                if (currentLocation) html += ` <span class="sep">›</span> <span data-nav="location" data-loc="${escapeHtml(currentLocation)}">${escapeHtml(currentLocation)}</span>`;
+                if (currentMethod) html += ` <span class="sep">›</span> <span class="current">${getMethodIcon(currentMethod)} ${escapeHtml(currentMethod)}</span>`;
+                breadcrumb.innerHTML = html;
+                breadcrumb.querySelectorAll('span[data-nav]').forEach(span => {
+                    span.addEventListener('click', () => {
+                        if (span.dataset.nav === 'home') goHome();
+                        else if (span.dataset.nav === 'location' && span.dataset.loc) selectLocation(span.dataset.loc);
+                    });
+                });
+            }
+            function goHome() {
+                currentLocation = null; currentMethod = null;
+                renderHome(); window.location.hash = ''; globalSearch.value = '';
+            }
+            window._selectLocation = selectLocation;
+            window._goHome = goHome;
+
+            btnBack.addEventListener('click', () => {
+                if (viewMode === 'result' && currentLocation) renderLocation(currentLocation);
+                else goHome();
+            });
+
+            globalSearch.addEventListener('input', function() {
+                const query = this.value.trim().toLowerCase();
+                if (!query) return;
+                let foundLocation = null, foundMethod = null;
+                for (const loc of allLocations) {
+                    if (loc.toLowerCase().includes(query) || query.includes(loc.toLowerCase())) {
+                        foundLocation = loc;
+                        for (const method of Object.keys(db[loc].methods)) {
+                            if (method.toLowerCase().includes(query) || query.includes(method.toLowerCase())) {
+                                foundMethod = method; break;
+                            }
+                        }
+                        if (foundMethod) break;
+                    }
+                }
+                if (!foundLocation) {
+                    for (const loc of allLocations) {
+                        for (const method of Object.keys(db[loc].methods)) {
+                            if (method.toLowerCase().includes(query) || query.includes(method.toLowerCase())) {
+                                foundLocation = loc; foundMethod = method; break;
+                            }
+                        }
+                        if (foundLocation) break;
+                    }
+                }
+                if (foundLocation && foundMethod) {
+                    renderResult(foundLocation, foundMethod);
+                    globalSearch.value = `${foundLocation} ${foundMethod}`;
+                    showToast(`已找到：${foundLocation} - ${foundMethod}`);
+                } else if (foundLocation) {
+                    selectLocation(foundLocation);
+                    showToast(`已找到部位：${foundLocation}`);
+                } else {
+                    showToast('未找到匹配结果');
+                }
+            });
+            globalSearch.addEventListener('keydown', e => { if (e.key === 'Enter') e.target.dispatchEvent(new Event('input')); });
+            document.addEventListener('keydown', e => {
+                if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); globalSearch.focus(); globalSearch.select(); }
+                if (e.key === 'Escape') { globalSearch.blur(); if (viewMode !== 'home') goHome(); }
+            });
+
+            function handleHash() {
+                const hash = decodeURIComponent(window.location.hash.slice(1));
+                if (hash && db[hash]) selectLocation(hash);
+            }
+            window.addEventListener('hashchange', handleHash);
+
+            function escapeHtml(str) { if (!str) return ''; const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
+            function escapeJs(str) { return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"'); }
+
+            function init() {
+                renderHome();
+                if (window.location.hash) handleHash();
+            }
+            init();
+            console.log('✅ 医学影像知识数据库已就绪');
+        })();
+    </script>
+</body>
+</html>
